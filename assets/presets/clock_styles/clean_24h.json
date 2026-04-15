@@ -1,0 +1,10 @@
+{
+  "id": "clean_24h",
+  "label": "Clean 24H",
+  "description": "Modern 24-hour display with blinking colon.",
+  "hour24": true,
+  "blinkColon": true,
+  "showDate": true,
+  "splitSeconds": false
+}
+

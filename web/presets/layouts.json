@@ -1,0 +1,26 @@
+[
+  {
+    "id": "minimal",
+    "label": "Minimal",
+    "description": "Large centered time with a clean footer date.",
+    "showHeader": false,
+    "hasSecondsPanel": false,
+    "showBorder": false
+  },
+  {
+    "id": "digital",
+    "label": "Digital",
+    "description": "Dashboard layout with header and dedicated seconds panel.",
+    "showHeader": true,
+    "hasSecondsPanel": true,
+    "showBorder": false
+  },
+  {
+    "id": "retro_pixel",
+    "label": "Retro Pixel",
+    "description": "Arcade-inspired framing with bold contrast.",
+    "showHeader": true,
+    "hasSecondsPanel": false,
+    "showBorder": true
+  }
+]

@@ -1,0 +1,29 @@
+[
+  {
+    "id": "clean_24h",
+    "label": "Clean 24H",
+    "description": "Modern 24-hour display with blinking colon.",
+    "hour24": true,
+    "blinkColon": true,
+    "showDate": true,
+    "splitSeconds": false
+  },
+  {
+    "id": "split_seconds",
+    "label": "Split Seconds",
+    "description": "24-hour display with dedicated seconds field.",
+    "hour24": true,
+    "blinkColon": true,
+    "showDate": true,
+    "splitSeconds": true
+  },
+  {
+    "id": "retro_12h",
+    "label": "Retro 12H",
+    "description": "12-hour clock with AM/PM secondary text.",
+    "hour24": false,
+    "blinkColon": false,
+    "showDate": true,
+    "splitSeconds": false
+  }
+]

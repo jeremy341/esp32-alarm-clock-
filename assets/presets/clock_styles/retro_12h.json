@@ -1,0 +1,10 @@
+{
+  "id": "retro_12h",
+  "label": "Retro 12H",
+  "description": "12-hour clock with AM/PM secondary text.",
+  "hour24": false,
+  "blinkColon": false,
+  "showDate": true,
+  "splitSeconds": false
+}
+

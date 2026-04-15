@@ -1,0 +1,8 @@
+{
+  "id": "retro_pixel",
+  "label": "Retro Pixel",
+  "description": "Arcade-inspired framing with bold contrast.",
+  "showHeader": true,
+  "hasSecondsPanel": false,
+  "showBorder": true
+}

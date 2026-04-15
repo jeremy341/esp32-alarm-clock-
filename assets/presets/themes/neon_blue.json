@@ -1,0 +1,15 @@
+{
+  "id": "neon_blue",
+  "label": "Neon Blue",
+  "description": "Electric blue accents with deep navy panels.",
+  "colors": {
+    "background": "#050a19",
+    "surface": "#0c1c38",
+    "primary": "#3ac1ff",
+    "secondary": "#afdeff",
+    "accent": "#ff5470",
+    "muted": "#2c445c"
+  },
+  "brightness": 220,
+  "contrast": 236
+}

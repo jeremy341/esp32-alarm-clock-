@@ -1,0 +1,8 @@
+{
+  "id": "minimal",
+  "label": "Minimal",
+  "description": "Large centered time with a clean footer date.",
+  "showHeader": false,
+  "hasSecondsPanel": false,
+  "showBorder": false
+}

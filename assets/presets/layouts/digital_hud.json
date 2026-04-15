@@ -1,0 +1,8 @@
+{
+  "id": "digital",
+  "label": "Digital",
+  "description": "Dashboard layout with header and dedicated seconds panel.",
+  "showHeader": true,
+  "hasSecondsPanel": true,
+  "showBorder": false
+}

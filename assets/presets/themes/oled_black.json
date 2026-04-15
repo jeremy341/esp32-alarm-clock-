@@ -1,0 +1,15 @@
+{
+  "id": "oled_black",
+  "label": "OLED Black",
+  "description": "High contrast cyan on true black.",
+  "colors": {
+    "background": "#000000",
+    "surface": "#0e1218",
+    "primary": "#6df0ff",
+    "secondary": "#829ab5",
+    "accent": "#ff9f43",
+    "muted": "#343d4a"
+  },
+  "brightness": 196,
+  "contrast": 248
+}

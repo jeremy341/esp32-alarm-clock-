@@ -1,0 +1,15 @@
+{
+  "id": "matrix_green",
+  "label": "Matrix Green",
+  "description": "Green phosphor look with amber highlights.",
+  "colors": {
+    "background": "#010702",
+    "surface": "#09180a",
+    "primary": "#73ff87",
+    "secondary": "#b4ffbe",
+    "accent": "#ffb64d",
+    "muted": "#203823"
+  },
+  "brightness": 208,
+  "contrast": 228
+}

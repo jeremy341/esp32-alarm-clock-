@@ -1,0 +1,47 @@
+[
+  {
+    "id": "oled_black",
+    "label": "OLED Black",
+    "description": "High contrast cyan on true black.",
+    "colors": {
+      "background": "#000000",
+      "surface": "#0e1218",
+      "primary": "#6df0ff",
+      "secondary": "#829ab5",
+      "accent": "#ff9f43",
+      "muted": "#343d4a"
+    },
+    "brightness": 196,
+    "contrast": 248
+  },
+  {
+    "id": "neon_blue",
+    "label": "Neon Blue",
+    "description": "Electric blue accents with deep navy panels.",
+    "colors": {
+      "background": "#050a19",
+      "surface": "#0c1c38",
+      "primary": "#3ac1ff",
+      "secondary": "#afdeff",
+      "accent": "#ff5470",
+      "muted": "#2c445c"
+    },
+    "brightness": 220,
+    "contrast": 236
+  },
+  {
+    "id": "matrix_green",
+    "label": "Matrix Green",
+    "description": "Green phosphor look with amber highlights.",
+    "colors": {
+      "background": "#010702",
+      "surface": "#09180a",
+      "primary": "#73ff87",
+      "secondary": "#b4ffbe",
+      "accent": "#ffb64d",
+      "muted": "#203823"
+    },
+    "brightness": 208,
+    "contrast": 228
+  }
+]

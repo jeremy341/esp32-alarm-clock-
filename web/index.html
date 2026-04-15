@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ESP32 Alarm Clock Preset Console</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #091019;
+      --panel: rgba(14, 20, 32, 0.9);
+      --panel-border: #233147;
+      --text: #edf4ff;
+      --muted: #8ea1bf;
+      --accent: #3ac1ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(58, 193, 255, 0.18), transparent 26%),
+        radial-gradient(circle at bottom right, rgba(255, 84, 112, 0.18), transparent 24%),
+        linear-gradient(180deg, #07101a 0%, #05070c 100%);
+      color: var(--text);
+      padding: 24px;
+    }
+
+    .shell {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(320px, 380px) minmax(360px, 1fr);
+      gap: 20px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 22px;
+      padding: 22px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      font-size: 1.9rem;
+      margin-bottom: 12px;
+    }
+
+    .lede {
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    label {
+      font-size: 0.94rem;
+      color: var(--muted);
+    }
+
+    select,
+    button {
+      width: 100%;
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      background: #0f1826;
+      color: var(--text);
+      padding: 12px 14px;
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      transition: border-color 140ms ease, transform 140ms ease;
+    }
+
+    button:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .toolbar {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .status {
+      margin-top: 14px;
+      min-height: 1.5em;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .notes {
+      margin-top: 20px;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 0.95rem;
+    }
+
+    .preview-wrap {
+      display: grid;
+      gap: 16px;
+    }
+
+    .preview-surface {
+      display: grid;
+      place-items: center;
+      min-height: 520px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, #0d1521 0%, #090d15 100%);
+      border: 1px solid var(--panel-border);
+      padding: 24px;
+    }
+
+    .preview-device {
+      width: min(100%, 700px);
+      aspect-ratio: 4 / 3;
+      border-radius: 28px;
+      padding: 18px;
+      background: #141923;
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+        0 18px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    .preview-screen {
+      width: 100%;
+      height: 100%;
+      border-radius: 18px;
+      background: var(--preview-bg, #000);
+      color: var(--preview-primary, #fff);
+      padding: 18px;
+      border: 3px solid var(--preview-border, #344050);
+      display: grid;
+      gap: 14px;
+    }
+
+    .preview-screen.retro {
+      box-shadow: inset 0 0 0 2px var(--preview-accent, #fff);
+    }
+
+    .preview-header {
+      background: var(--preview-surface, #111);
+      color: var(--preview-accent, #fff);
+      border: 1px solid var(--preview-border, #444);
+      border-radius: 12px;
+      min-height: 40px;
+      display: grid;
+      place-items: center;
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .preview-main {
+      display: grid;
+      gap: 12px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .preview-main.digital {
+      grid-template-columns: 1fr 92px;
+    }
+
+    .preview-card {
+      border-radius: 16px;
+      border: 1px solid var(--preview-border, #444);
+      background: var(--preview-surface, #111);
+      display: grid;
+      place-items: center;
+      padding: 12px;
+      min-height: 0;
+    }
+
+    .preview-clock {
+      font-size: clamp(2.6rem, 8vw, 5.4rem);
+      letter-spacing: 0.08em;
+      font-weight: 700;
+    }
+
+    .preview-clock.retro {
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .preview-secondary {
+      font-size: clamp(1rem, 2.2vw, 1.7rem);
+      color: var(--preview-accent, #fff);
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .preview-date {
+      color: var(--preview-secondary, #cfd8e3);
+      font-size: clamp(0.95rem, 1.8vw, 1.2rem);
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .preview-meta {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .meta-card {
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 14px;
+      background: rgba(8, 13, 21, 0.72);
+    }
+
+    .meta-card h3 {
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+
+    .meta-card p {
+      color: var(--muted);
+      margin-bottom: 0;
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .log {
+      border-radius: 14px;
+      padding: 12px 14px;
+      min-height: 72px;
+      background: rgba(4, 8, 14, 0.82);
+      border: 1px solid var(--panel-border);
+      color: var(--muted);
+      font-family: "Consolas", monospace;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 940px) {
+      .shell {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-meta {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-surface {
+        min-height: 420px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="panel">
+      <h1>ESP32 Alarm Clock Preset Console</h1>
+      <p class="lede">
+        Pick a layout, theme, and clock style. The browser only sends preset JSON.
+        The ESP32 renders the full UI live from the DS3231-backed clock state.
+      </p>
+
+      <div class="field">
+        <label for="layout-select">Layout</label>
+        <select id="layout-select"></select>
+      </div>
+
+      <div class="field">
+        <label for="theme-select">Theme</label>
+        <select id="theme-select"></select>
+      </div>
+
+      <div class="field">
+        <label for="clock-style-select">Clock Style</label>
+        <select id="clock-style-select"></select>
+      </div>
+
+      <div class="toolbar">
+        <button id="connect-button" type="button">Connect ESP32</button>
+        <button id="apply-button" type="button">Apply Preset</button>
+      </div>
+
+      <div id="status-label" class="status">Loading presets...</div>
+
+      <div class="notes">
+        <p>Hardware assumptions: ESP32-WROOM + CH340 USB bridge, ILI9341 on SPI, DS3231 on I2C, and LittleFS enabled in PlatformIO.</p>
+      </div>
+
+      <div class="field">
+        <label>Device Log</label>
+        <div id="device-log" class="log">No device output yet.</div>
+      </div>
+    </section>
+
+    <section class="panel preview-wrap">
+      <div class="preview-surface">
+        <div class="preview-device">
+          <div id="preview-root"></div>
+        </div>
+      </div>
+
+      <div class="preview-meta">
+        <article class="meta-card">
+          <h3 id="layout-title">Layout</h3>
+          <p id="layout-description"></p>
+        </article>
+        <article class="meta-card">
+          <h3 id="theme-title">Theme</h3>
+          <p id="theme-description"></p>
+        </article>
+        <article class="meta-card">
+          <h3 id="clock-style-title">Clock Style</h3>
+          <p id="clock-style-description"></p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

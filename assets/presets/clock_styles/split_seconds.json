@@ -1,0 +1,10 @@
+{
+  "id": "split_seconds",
+  "label": "Split Seconds",
+  "description": "24-hour display with dedicated seconds field.",
+  "hour24": true,
+  "blinkColon": true,
+  "showDate": true,
+  "splitSeconds": true
+}
+
