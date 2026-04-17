@@ -1,89 +1,177 @@
 # ESP32 Alarm Clock
 
-Preset-driven ESP32 alarm clock built for:
+Preset-driven ESP32 alarm clock with ILI9341 TFT, DS3231 RTC, physical buttons, buzzer alarm, and a WebSerial-based browser configuration app.
 
-- ESP32-WROOM with CH340 USB serial bridge
-- ILI9341 SPI TFT using `TFT_eSPI`
-- DS3231 RTC on I2C
-- LittleFS persistent storage
-- Web Serial configuration from a plain browser app
+---
 
-## Core idea
+## Hardware
 
-This project is not bitmap-based.
+| Component | Part |
+|---|---|
+| MCU | ESP32-WROOM-32 (CH340 USB) |
+| Display | ILI9341 2.8" SPI TFT (320×240) |
+| RTC | DS3231 on I2C |
+| Buzzer | Active/passive on GPIO 25 |
+| Buttons | 4× tactile (MODE, UP, DOWN, SET) |
 
-The browser only sends JSON preset selections:
+### Pin Map
 
-- layout
-- theme
-- clock style
+| Signal | GPIO |
+|---|---|
+| TFT MOSI | 23 |
+| TFT SCLK | 18 |
+| TFT CS | 5 |
+| TFT DC | 2 |
+| TFT RST | 4 |
+| TFT BL | 15 |
+| RTC SDA | 21 |
+| RTC SCL | 22 |
+| BTN MODE | 34 |
+| BTN UP | 35 |
+| BTN DOWN | 32 |
+| BTN SET | 33 |
+| BUZZER | 25 |
 
-The ESP32 renders the full UI dynamically on-device and updates only the clock region every second to reduce redraw flicker.
+All buttons are wired to GND with INPUT_PULLUP — no external resistors needed.
 
-## Included presets
-
-### Layouts
-
-- `minimal`
-- `digital`
-- `retro_pixel`
-
-### Themes
-
-- `oled_black`
-- `neon_blue`
-- `matrix_green`
-
-### Clock styles
-
-- `clean_24h`
-- `split_seconds`
-- `retro_12h`
+---
 
 ## Firmware
 
-The firmware:
+### Build
 
-- reads time from the DS3231
-- falls back to compile time if the RTC is missing
-- loads the last preset selection from LittleFS at boot
-- accepts JSON preset packets over USB serial
-- validates packets with CRC16
-- redraws static chrome only when the preset changes
-- redraws only the dynamic clock area on live updates
+```bash
+cd firmware
+pio run
+pio run --target upload
+pio run --target uploadfs   # uploads LittleFS partition (empty on first flash)
+```
 
-## Web app
+Requires PlatformIO. All libraries are declared in `platformio.ini` and fetched automatically.
 
-The web app:
+### Module overview
 
-- loads preset catalogs from `web/presets/*.json`
-- shows a live preview of the selected combination
-- connects to the ESP32 via Web Serial
-- sends the selected preset as JSON with a binary packet envelope and CRC
+```
+firmware/src/
+├── main.cpp          App controller — state machine, zero business logic
+├── display.cpp       ILI9341 renderer, 3 layouts, sprite-buffered
+├── rtc.cpp           DS3231 wrapper with compile-time software fallback
+├── storage.cpp       LittleFS read/write for preset + alarm JSON
+├── input.cpp         Debounced 4-button driver with hold detection
+├── buzzer.cpp        LEDC-based alarm pattern with auto-timeout + snooze
+├── serial_rx.cpp     Binary packet state machine (SOF · CRC16 · dispatch)
+└── preset.cpp        Preset/AlarmCfg struct helpers
 
-## PlatformIO
+firmware/include/
+├── config.h          All pin assignments and tunables in one place
+├── protocol.h        Wire protocol constants (shared with web app)
+├── modules.h         Module interface declarations
+├── preset.h          Preset + AlarmCfg structs
+└── crc16.h           Inline CRC16/CCITT
+```
 
-`firmware/platformio.ini` is configured for:
+### Button behaviour
 
-- `esp32dev`
-- `TFT_eSPI`
-- `RTClib`
-- `ArduinoJson`
-- `LittleFS`
+| Button | Short press | Long press (2 s) |
+|---|---|---|
+| MODE | Enter/exit menu | Force back to clock from anywhere |
+| UP | Menu up / increment / Snooze alarm | — |
+| DOWN | Menu down / decrement | — |
+| SET | Confirm selection | — |
 
-## Web usage
+### Layouts
 
-Serve the `web/` folder over `http://localhost`, for example:
+| ID | Name | Description |
+|---|---|---|
+| `minimal` | Minimal | Large clean digits on black, date below |
+| `digital` | Digital | Terminal-style with horizontal rules and status line |
+| `retro_pixel` | Retro Pixel | CRT scanlines, pixel shadow, purple/pink palette |
 
-```powershell
+---
+
+## Web App
+
+### Serve locally
+
+```bash
 cd web
 python -m http.server 8000
+# then open http://localhost:8000 in Chrome or Edge
 ```
 
-Then open:
+WebSerial requires **Chrome or Edge** and a **localhost or HTTPS** origin.
 
-```text
-http://localhost:8000
+### Features
+
+- **Live clock preview** on each layout card — shows real current time
+- **Push to device** — sends layout/theme/clock-style JSON over USB serial
+- **Set alarm** — sends alarm hour, minute, and enabled state
+- **Sync time** — sends current PC time to the ESP32 RTC
+
+### File structure
+
+```
+web/
+├── index.html        Single-file app (no bundler needed)
+└── js/
+    ├── serial.js     WebSerial transport — connect, send, ACK/NACK
+    └── protocol.js   Protocol constants mirrored from firmware
 ```
 
-Use a Chromium-based browser with Web Serial enabled.
+---
+
+## Wire Protocol
+
+```
+[0xAA][0x55][CMD][SEQ][LEN_HI][LEN_LO][PAYLOAD...][CRC_HI][CRC_LO]
+```
+
+Payload is always a JSON string. CRC16/CCITT over payload bytes only.
+
+| CMD | Direction | Payload |
+|---|---|---|
+| `0x00` PING | PC→ESP | `{}` |
+| `0x01` PRESET | PC→ESP | `{"layout":"minimal","theme":"oled_black","clock_style":"clean_24h"}` |
+| `0x02` SET_TIME | PC→ESP | `{"year":2025,"month":4,"day":17,"hour":10,"minute":30,"second":0}` |
+| `0x03` SET_ALARM | PC→ESP | `{"hour":7,"minute":0,"enabled":true}` |
+| `0x80` ACK | ESP→PC | echoed SEQ byte |
+| `0x81` NACK | ESP→PC | `[seq, err_code]` |
+
+---
+
+## Storage
+
+Preset and alarm are persisted to LittleFS:
+
+```
+/preset.json   {"layout":"minimal","theme":"oled_black","clock_style":"clean_24h"}
+/alarm.json    {"hour":7,"minute":0,"enabled":false}
+```
+
+Both are loaded at boot. Missing files fall back to defaults.
+
+---
+
+## Testing without hardware
+
+Open `web/index.html` via `python -m http.server` in Chrome.
+
+The UI is fully testable without an ESP32 — live clock previews, theme/style pickers, and alarm inputs all work. The "Push", "Set alarm", and "Sync time" buttons are disabled until a serial port is connected.
+
+To mock the serial connection and inspect packets in DevTools:
+
+```js
+// Paste in DevTools console before clicking Connect
+navigator.serial.requestPort = async () => ({
+  open: async () => {},
+  writable: { getWriter: () => ({ write: async d => console.log('TX:', d), releaseLock: ()=>{} }) },
+  readable: { getReader: () => ({ read: async () => ({ done: true }), releaseLock: ()=>{} }) },
+  close: async () => {}
+});
+```
+
+---
+
+## License
+
+MIT
