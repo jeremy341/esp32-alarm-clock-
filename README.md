@@ -1,36 +1,79 @@
-# ESP32 Alarm Clock
+# ⏰ ESP32 Alarm Clock / Funkuhr
 
-Preset-driven ESP32 alarm clock with ILI9341 TFT, DS3231 RTC, physical buttons, buzzer alarm, and a WebSerial-based browser configuration app.
+A modular ESP32-based smart alarm clock with TFT display, real-time clock (RTC), button navigation, and expandable firmware architecture.  
+Designed for learning embedded systems, UI development, and future hardware enclosure integration.
 
 ---
 
-## Hardware
+## 📌 Overview
 
-| Component | Part |
+This project turns an ESP32 into a fully functional digital alarm clock with:
+
+- Precise timekeeping using DS3231 RTC
+- Optional WiFi NTP time synchronization
+- Graphical UI on ILI9341 TFT display
+- Button-based navigation system
+- Buzzer-based alarm system
+- Modular and expandable firmware design
+- CAD-ready enclosure planning
+
+---
+
+## 🧠 Core Components
+
+| Component | Model |
 |---|---|
-| MCU | ESP32-WROOM-32 (CH340 USB) |
+| MCU | ESP32-WROOM-32 |
 | Display | ILI9341 2.8" SPI TFT (320×240) |
-| RTC | DS3231 on I2C |
-| Buzzer | Active/passive on GPIO 25 |
-| Buttons | 4× tactile (MODE, UP, DOWN, SET) |
+| RTC | DS3231 (I2C) |
+| Buzzer | Active / Passive buzzer |
+| Buttons | 3–4 tactile switches |
+| Power | 5V USB input (optional Li-ion system) |
 
-### Pin Map
+---
 
+## 🔌 Pin Configuration (ESP32)
+
+### 📺 ILI9341 (SPI)
 | Signal | GPIO |
 |---|---|
-| TFT MOSI | 23 |
-| TFT SCLK | 18 |
-| TFT CS | 5 |
-| TFT DC | 2 |
-| TFT RST | 4 |
-| TFT BL | 15 |
-| RTC SDA | 21 |
-| RTC SCL | 22 |
-| BTN MODE | 34 |
-| BTN UP | 35 |
-| BTN DOWN | 32 |
-| BTN SET | 33 |
-| BUZZER | 25 |
+| SCK | 18 |
+| MOSI | 23 |
+| MISO | 19 |
+| CS | 5 |
+| DC | 2 |
+| RESET | 4 |
+| LED | 15 |
+
+---
+
+### ⏰ DS3231 (I2C)
+| Signal | GPIO |
+|---|---|
+| SDA | 21 |
+| SCL | 22 |
+
+---
+
+### 🔘 Buttons
+| Function | GPIO |
+|---|---|
+| MODE | 32 |
+| UP | 33 |
+| DOWN | 27 |
+| SET | 14 |
+
+---
+
+### 🔊 Buzzer
+| Signal | GPIO |
+|---|---|
+| CONTROL | 25 |
+
+---
+
+## 🧱 Project Structure (PlatformIO)
+
 
 All buttons are wired to GND with INPUT_PULLUP — no external resistors needed.
 
