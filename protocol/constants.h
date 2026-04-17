@@ -15,6 +15,7 @@ static constexpr size_t kPacketOverheadBytes = 8;
 static constexpr size_t kMaxPacketBytes = kMaxJsonPayloadBytes + kPacketOverheadBytes;
 
 static constexpr char kConfigFilePath[] = "/preset.json";
+static constexpr char kAlarmFilePath[] = "/alarm.json";
 static constexpr char kDeviceName[] = "ESP32 Alarm Clock";
 
 }  // namespace alarm_clock_protocol

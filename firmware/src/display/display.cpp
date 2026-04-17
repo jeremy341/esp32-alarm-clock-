@@ -1,5 +1,7 @@
 #include "display.h"
 
+#include "../core/alarm.h"
+
 #include <string.h>
 
 DisplayManager::DisplayManager()
@@ -36,17 +38,44 @@ void DisplayManager::renderFull(const ClockSnapshot& snapshot) {
   updateClock(snapshot, true);
 }
 
-void DisplayManager::updateClock(const ClockSnapshot& snapshot, bool force) {
+void DisplayManager::renderMenuScreen(const char* title,
+                                     const char* line1,
+                                     const char* line2,
+                                     const char* hint) {
   if (!ready_) {
     return;
   }
 
-  const ClockRenderModel model = buildClockRenderModel(preset_, snapshot);
+  tft_.fillScreen(palette_.background);
+  tft_.setTextDatum(MC_DATUM);
+  tft_.setTextColor(palette_.primary, palette_.background);
+  tft_.setTextFont(4);
+  tft_.drawString(title, tft_.width() / 2, 32);
+
+  tft_.setTextFont(2);
+  tft_.drawString(line1, tft_.width() / 2, 90);
+  tft_.drawString(line2, tft_.width() / 2, 130);
+
+  tft_.setTextDatum(BC_DATUM);
+  tft_.setTextFont(1);
+  tft_.setTextColor(palette_.secondary, palette_.background);
+  tft_.drawString(hint, tft_.width() / 2, tft_.height() - 12);
+}
+
+void DisplayManager::updateClock(const ClockSnapshot& snapshot, bool force,
+                                 const alarm_system::Schedule* alarm,
+                                 bool alarmRinging) {
+  if (!ready_) {
+    return;
+  }
+
+  const ClockRenderModel model = buildClockRenderModel(preset_, snapshot, alarm, alarmRinging);
   if (!force && hasLastModel_ && modelsEqual(lastModel_, model)) {
     return;
   }
 
-  drawClockLayer(tft_, preset_, palette_, geometry_, model);
+  drawClockLayer(tft_, preset_, palette_, geometry_, model,
+                 hasLastModel_ ? &lastModel_ : nullptr);
   lastModel_ = model;
   hasLastModel_ = true;
 }

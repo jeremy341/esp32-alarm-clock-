@@ -1,4 +1,5 @@
 #include "../display/display.h"
+#include "../core/alarm.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -62,7 +63,9 @@ void formatDateText(const ClockSnapshot& snapshot, char* buffer, size_t bufferSi
 
 }  // namespace
 
-ClockRenderModel buildClockRenderModel(const ui::ResolvedPreset& preset, const ClockSnapshot& snapshot) {
+ClockRenderModel buildClockRenderModel(const ui::ResolvedPreset& preset, const ClockSnapshot& snapshot,
+                                          const alarm_system::Schedule* alarm,
+                                          bool alarmRinging) {
   ClockRenderModel model{};
 
   if (preset.clockStyle == nullptr || preset.layout == nullptr || !snapshot.valid) {
@@ -82,5 +85,17 @@ ClockRenderModel buildClockRenderModel(const ui::ResolvedPreset& preset, const C
   model.colonVisible = colonVisible;
   model.primaryFont = preset.clockStyle->primaryFont;
   model.secondaryFont = preset.clockStyle->secondaryFont;
+
+  if (alarm != nullptr && alarm->enabled) {
+    model.showAlarmStatus = true;
+    if (alarmRinging) {
+      snprintf(model.alarmStatus, sizeof(model.alarmStatus), "ALARM %02u:%02u", alarm->hour, alarm->minute);
+      model.alarmRinging = true;
+    } else {
+      snprintf(model.alarmStatus, sizeof(model.alarmStatus), "Alarm %02u:%02u %s",
+               alarm->hour, alarm->minute, alarm_system::modeShortLabel(alarm->mode));
+    }
+  }
+
   return model;
 }

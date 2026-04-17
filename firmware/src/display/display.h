@@ -6,6 +6,10 @@
 #include "../time/clock.h"
 #include "../ui/presets.h"
 
+namespace alarm_system {
+struct Schedule;
+}
+
 struct DisplayRect {
   int16_t x = 0;
   int16_t y = 0;
@@ -42,13 +46,19 @@ struct ClockRenderModel {
   bool showSecondary = false;
   bool showDate = false;
   bool colonVisible = true;
+  bool showAlarmStatus = false;
+  bool alarmRinging = false;
+  char alarmStatus[32] = "";
   uint8_t primaryFont = 7;
   uint8_t secondaryFont = 2;
 };
 
 ThemePalette buildThemePalette(const ui::ResolvedPreset& preset);
 LayoutGeometry buildLayoutGeometry(const ui::ResolvedPreset& preset, int16_t screenWidth, int16_t screenHeight);
-ClockRenderModel buildClockRenderModel(const ui::ResolvedPreset& preset, const ClockSnapshot& snapshot);
+ClockRenderModel buildClockRenderModel(const ui::ResolvedPreset& preset,
+                                      const ClockSnapshot& snapshot,
+                                      const alarm_system::Schedule* alarm = nullptr,
+                                      bool alarmRinging = false);
 
 void drawStaticLayer(TFT_eSPI& tft,
                      const ui::ResolvedPreset& preset,
@@ -59,7 +69,15 @@ void drawClockLayer(TFT_eSPI& tft,
                     const ui::ResolvedPreset& preset,
                     const ThemePalette& palette,
                     const LayoutGeometry& geometry,
-                    const ClockRenderModel& model);
+                    const ClockRenderModel& model,
+                    const ClockRenderModel* previousModel = nullptr);
+
+void renderMenuScreen(TFT_eSPI& tft,
+                      const ThemePalette& palette,
+                      const char* title,
+                      const char* line1,
+                      const char* line2,
+                      const char* hint);
 
 class DisplayManager {
 public:
@@ -68,7 +86,13 @@ public:
   void begin();
   void setPreset(const ui::ResolvedPreset& preset);
   void renderFull(const ClockSnapshot& snapshot);
-  void updateClock(const ClockSnapshot& snapshot, bool force = false);
+  void renderMenuScreen(const char* title,
+                        const char* line1,
+                        const char* line2,
+                        const char* hint);
+  void updateClock(const ClockSnapshot& snapshot, bool force = false,
+                   const alarm_system::Schedule* alarm = nullptr,
+                   bool alarmRinging = false);
 
 private:
   bool modelsEqual(const ClockRenderModel& left, const ClockRenderModel& right) const;

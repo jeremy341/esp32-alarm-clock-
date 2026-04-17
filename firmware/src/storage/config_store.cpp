@@ -2,6 +2,7 @@
 
 #include "../../../protocol/constants.h"
 #include "../../../protocol/preset_format.h"
+#include "../core/alarm.h"
 #include "../ui/presets.h"
 
 namespace storage {
@@ -41,6 +42,36 @@ bool savePresetSelection(const ui::PresetSelection& selection) {
   String content;
   serializeJson(document, content);
   return writeTextFile(alarm_clock_protocol::kConfigFilePath, content);
+}
+
+bool loadAlarmSchedule(alarm_system::Schedule& schedule) {
+  String content;
+  if (!readTextFile(alarm_clock_protocol::kAlarmFilePath, content)) {
+    return false;
+  }
+
+  StaticJsonDocument<128> document;
+  if (deserializeJson(document, content)) {
+    return false;
+  }
+
+  schedule.enabled = document["enabled"] | false;
+  schedule.hour = document["hour"] | schedule.hour;
+  schedule.minute = document["minute"] | schedule.minute;
+  schedule.mode = static_cast<alarm_system::Mode>(document["mode"] | static_cast<uint8_t>(schedule.mode));
+  return true;
+}
+
+bool saveAlarmSchedule(const alarm_system::Schedule& schedule) {
+  StaticJsonDocument<128> document;
+  document["enabled"] = schedule.enabled;
+  document["hour"] = schedule.hour;
+  document["minute"] = schedule.minute;
+  document["mode"] = static_cast<uint8_t>(schedule.mode);
+
+  String content;
+  serializeJson(document, content);
+  return writeTextFile(alarm_clock_protocol::kAlarmFilePath, content);
 }
 
 }  // namespace storage

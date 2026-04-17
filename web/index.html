@@ -149,15 +149,94 @@
   .card-preview {
     width: 100%;
     height: 180px;
-    display: flex; align-items: center; justify-content: center;
+    display: flex; flex-direction: column;
+    align-items: flex-start; justify-content: flex-start;
     position: relative;
+    padding: 18px;
     overflow: hidden;
+  }
+
+  .preview-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: auto;
+    gap: 12px;
+  }
+
+  .preview-days {
+    font-size: .65rem; font-weight: 700;
+    letter-spacing: .16em; text-transform: uppercase;
+    color: rgba(255,255,255,.55);
+  }
+
+  .preview-toggle {
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255,255,255,.08);
+    color: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform .2s ease, background .2s ease;
+  }
+
+  .preview-toggle:hover {
+    background: rgba(255,255,255,.14);
+  }
+
+  .card-preview.alarm-open .preview-toggle svg {
+    transform: rotate(180deg);
+  }
+
+  .alarm-panel {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 54px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, .72);
+    color: #f8f3e9;
+    font-size: .72rem;
+    line-height: 1.4;
+    display: none;
+    box-shadow: 0 12px 28px rgba(0,0,0,.36);
+    backdrop-filter: blur(6px);
+  }
+
+  .card-preview.alarm-open .alarm-panel {
+    display: block;
+  }
+
+  .alarm-title {
+    font-size: .82rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .alarm-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .alarm-row strong {
+    font-weight: 700;
   }
 
   /* ── Minimal preview ── */
   .preview-minimal {
     background: #0a0a0a;
-    flex-direction: column; gap: 4px;
+    gap: 8px;
   }
   .preview-minimal .time-big {
     font-family: 'DM Sans', monospace;
@@ -173,8 +252,8 @@
   /* ── Digital preview ── */
   .preview-digital {
     background: #0d1a12;
-    flex-direction: column; gap: 6px; align-items: flex-start;
-    padding: 0 28px;
+    gap: 8px;
+    padding: 18px 24px 18px;
   }
   .preview-digital .dig-time {
     font-family: 'DM Serif Display', monospace;
@@ -193,7 +272,7 @@
   /* ── Retro Pixel preview ── */
   .preview-retro {
     background: #1a0a2e;
-    flex-direction: column; gap: 4px;
+    gap: 8px;
     image-rendering: pixelated;
   }
   .preview-retro .retro-time {
@@ -479,7 +558,19 @@
     <article class="layout-card" onclick="openModal('minimal')" tabindex="0" role="button" aria-label="Configure Minimal layout">
       <div class="card-preview preview-minimal">
         <span class="time-big" id="clock-minimal">12:00</span>
-        <span class="date-small">Friday · April 2026</span>
+        <div class="preview-bottom">
+          <span class="date-small">Friday · April 2026</span>
+          <span class="preview-days">MON - FRI</span>
+        </div>
+        <button class="preview-toggle" onclick="toggleAlarmPreview(event, this)" aria-label="Toggle alarm preview">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="alarm-panel">
+          <div class="alarm-title">Alarm Setup</div>
+          <div class="alarm-row"><span>Time:</span><strong class="alarm-time">07:30</strong></div>
+          <div class="alarm-row"><span>Days:</span><strong class="alarm-days">MON - FRI</strong></div>
+          <div class="alarm-row" style="opacity:.75;font-size:.72rem;">Press arrow to close</div>
+        </div>
       </div>
       <div class="card-body">
         <p class="card-name">Minimal</p>
@@ -495,8 +586,19 @@
     <article class="layout-card" onclick="openModal('digital')" tabindex="0" role="button" aria-label="Configure Digital layout">
       <div class="card-preview preview-digital">
         <div class="dig-time" id="clock-digital">12:00</div>
-        <div class="dig-bar"></div>
-        <div class="dig-meta">Friday · April 2026 · uptime 00:00</div>
+        <div class="preview-bottom">
+          <span class="date-small">Friday · April 2026</span>
+          <span class="preview-days">MON - FRI</span>
+        </div>
+        <button class="preview-toggle" onclick="toggleAlarmPreview(event, this)" aria-label="Toggle alarm preview">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="alarm-panel">
+          <div class="alarm-title">Alarm Setup</div>
+          <div class="alarm-row"><span>Time:</span><strong class="alarm-time">07:30</strong></div>
+          <div class="alarm-row"><span>Days:</span><strong class="alarm-days">MON - FRI</strong></div>
+          <div class="alarm-row" style="opacity:.75;font-size:.72rem;">Press arrow to close</div>
+        </div>
       </div>
       <div class="card-body">
         <p class="card-name">Digital</p>
@@ -513,7 +615,19 @@
       <div class="card-preview preview-retro">
         <div class="retro-scanline"></div>
         <div class="retro-time" id="clock-retro">12:00</div>
-        <div class="retro-sub">Friday · Apr 2026</div>
+        <div class="preview-bottom">
+          <span class="date-small">Friday · Apr 2026</span>
+          <span class="preview-days">MON - FRI</span>
+        </div>
+        <button class="preview-toggle" onclick="toggleAlarmPreview(event, this)" aria-label="Toggle alarm preview">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="alarm-panel">
+          <div class="alarm-title">Alarm Setup</div>
+          <div class="alarm-row"><span>Time:</span><strong class="alarm-time">07:30</strong></div>
+          <div class="alarm-row"><span>Days:</span><strong class="alarm-days">MON - FRI</strong></div>
+          <div class="alarm-row" style="opacity:.75;font-size:.72rem;">Press arrow to close</div>
+        </div>
       </div>
       <div class="card-body">
         <p class="card-name">Retro Pixel</p>
@@ -616,6 +730,23 @@ const LAYOUT_META = {
 };
 
 /* ─── Live clock ─────────────────────────────────────────────── */
+function weekdayLabel(date) {
+  return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
+}
+
+function monthLabel(date) {
+  return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][date.getMonth()];
+}
+
+function alarmDaysLabel(date) {
+  return date.getDay() >= 1 && date.getDay() <= 5 ? 'MON - FRI' : 'SAT - SUN';
+}
+
+function updateAlarmPreviewPanels(now, displayDays) {
+  document.querySelectorAll('.alarm-time').forEach(el => el.textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`);
+  document.querySelectorAll('.alarm-days').forEach(el => el.textContent = displayDays);
+}
+
 function tick() {
   const now = new Date();
   const hh  = String(now.getHours()).padStart(2,'0');
@@ -623,10 +754,15 @@ function tick() {
   const ss  = String(now.getSeconds()).padStart(2,'0');
   const t   = `${hh}:${mm}`;
   const ts  = `${hh}:${mm}<span style="opacity:.4;font-size:.65em">:${ss}</span>`;
+  const dateText = `${weekdayLabel(now)} · ${monthLabel(now)} ${now.getDate()}`;
+  const daysText = alarmDaysLabel(now);
 
   document.getElementById('clock-minimal').textContent = t;
   document.getElementById('clock-digital').textContent = t;
   document.getElementById('clock-retro').textContent   = t;
+  document.querySelectorAll('.date-small').forEach(el => el.textContent = dateText);
+  document.querySelectorAll('.preview-days').forEach(el => el.textContent = daysText);
+  updateAlarmPreviewPanels(now, daysText);
 
   // modal strip
   const strip = document.getElementById('modal-strip-time');
@@ -656,6 +792,14 @@ function buildStripHTML(layout) {
     <div style="position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.15) 3px,rgba(0,0,0,.15) 4px);pointer-events:none"></div>
     <div style="font-family:'Courier New',monospace;font-size:1.8rem;font-weight:700;color:#FF6BFF;text-shadow:2px 2px 0 #7B00FF,0 0 24px rgba(255,107,255,.5)" id="modal-strip-time">${hh}:${mm}</div>
     <div style="font-size:.58rem;font-weight:700;color:#FF6BFF;opacity:.6;letter-spacing:.22em;text-transform:uppercase;margin-top:4px">Friday · Apr 2026</div>`;
+}
+
+function toggleAlarmPreview(event, button) {
+  event.stopPropagation();
+  event.preventDefault();
+  const preview = button.closest('.card-preview');
+  if (!preview) return;
+  preview.classList.toggle('alarm-open');
 }
 
 function openModal(layout) {
